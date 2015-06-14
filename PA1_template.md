@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Set Options for all chunks
 
 Set echo=TRUE globally
 
-```{r setoptions,echo=TRUE}
+
+```r
 library(knitr)
 opts_chunk$set(echo = TRUE)
 ```
@@ -20,15 +16,29 @@ Load project data
 - unzip() and read.csv needed from utils package
 - lubridate will be used for date conversion
 
-```{r chunk01}
+
+```r
 library("utils",quietly=TRUE)
 library("lubridate",quietly=TRUE)
+```
 
+```
+## Warning: package 'lubridate' was built under R version 3.1.3
+```
+
+```r
 zipName <- "activity.zip"
 PA1actData <- read.csv(unzip(zipName), header = FALSE, skip = 1, as.is=TRUE)
 names(PA1actData) <- c("steps","date","interval")
 PA1actData$date <- ymd(PA1actData$date)
 str(PA1actData)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : POSIXct, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 ## What is mean total number of steps taken per day?
@@ -39,7 +49,8 @@ and summarize with mean and median values
 - dplyr will provide data analysis support
 - ggplot2 will be used for plotting
 
-```{r chunk02,echo=TRUE,fig.height=4}
+
+```r
 library("dplyr",quietly=TRUE,warn.conflicts=FALSE)
 library("ggplot2",quietly=TRUE)
 
@@ -84,13 +95,22 @@ ggp <- ggplot(dailyData, aes(x=totSteps)) +
                 ggtitle(ddDaysLab)
 
         ggsave(paste("figures/dailyData","Chunk02",".png",sep=""))
-        
+```
+
+```
+## Saving 7 x 4 in image
+```
+
+```r
         plot(ggp)
 ```
 
+![](PA1_template_files/figure-html/chunk02-1.png) 
+
 ## What is the average daily activity pattern?
 
-```{r chunk03,fig.height=4}
+
+```r
 ## Analyzes steps taken over the time of day
 #  Plotting done in ggplot2
 library("ggplot2",quietly=TRUE)
@@ -126,9 +146,17 @@ ggp <- ggplot(avgStepData, aes(x=interval,y=avgSteps)) +
         ggtitle("Average Steps Over a Day")
 
         ggsave(paste("figures/timeOfSteps","Chunk03",".png",sep=""))
-        
+```
+
+```
+## Saving 7 x 4 in image
+```
+
+```r
         plot(ggp)
 ```
+
+![](PA1_template_files/figure-html/chunk03-1.png) 
 
 ## Inputing missing values
 
@@ -137,7 +165,8 @@ with the mean for that daily interval across all the days.  This seems
 to be the least distuptive of the time of day step data which reflects
 actual usage of these devices.
 
-```{r chunk04}
+
+```r
 ## Calculate # NAs in the steps data
 #  Find NAs
 stepNAs <- with(PA1actData,is.na(steps))
@@ -149,7 +178,13 @@ print(paste(as.character(nas),
             " intervals had no data for an average of ",
             as.character(nas100),
             "% missing!",sep=""))
+```
 
+```
+## [1] "2304 intervals had no data for an average of 13% missing!"
+```
+
+```r
 ## Build data with NAs filled in by mean of the steps in the interval
 
 ## Plot distribution with mean and median lines
@@ -169,6 +204,16 @@ PA1actDataNoNAs <- data.frame(PA1actData %>%
 ddDays <- length(unique(as.character(PA1actDataNoNAs[complete.cases(PA1actDataNoNAs),]$date)))
 
 str(PA1actDataNoNAs)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  1 0 0 0 0 2 0 0 0 1 ...
+##  $ date    : POSIXct, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 dailyData  <- data.frame(PA1actDataNoNAs %>%
                 group_by(date) %>% 
                 summarize(totSteps=sum(steps))
@@ -200,10 +245,17 @@ ggp <- ggplot(dailyData, aes(x=totSteps)) +
                 ggtitle(ddDaysLab)
 
         ggsave(paste("figures/dailyData","Chunk04",".png",sep=""))
-        
-        plot(ggp)
+```
 
 ```
+## Saving 7 x 5 in image
+```
+
+```r
+        plot(ggp)
+```
+
+![](PA1_template_files/figure-html/chunk04-1.png) 
 
 The result of this choice was to add "average distribution days" for the
 days with the missing data.  As a result we just have extra days with
@@ -212,7 +264,8 @@ not change much.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r chunk05}
+
+```r
 #  Add dayType column default to weekday
 PA1actDataNoNAs <- mutate(PA1actDataNoNAs, dayType = "weekday")
 #  Update Sat and Sun to weekend
@@ -272,7 +325,13 @@ print(paste("The Average Total Steps per Weekday are: ",
             " versus the Average Total Steps per weekend day: ",
             as.character(totalStepsWeekend),
             ".",sep=""))
+```
 
+```
+## [1] "The Average Total Steps per Weekday are: 10239 versus the Average Total Steps per weekend day: 12185."
+```
+
+```r
 print(paste("The weekend Average Total Steps were ",
             as.character(
                     as.integer(100 * (totalStepsWeekend/totalStepsWeekday - 1)
@@ -280,7 +339,13 @@ print(paste("The weekend Average Total Steps were ",
                     ),
             "% more than the weekday Average Total Steps.",
             sep=""))
+```
 
+```
+## [1] "The weekend Average Total Steps were 19% more than the weekday Average Total Steps."
+```
+
+```r
 d <- rbind(d1, d2)
 
 ggp <- ggplot(data = d, mapping = aes(x=interval,y=avgSteps)) +
@@ -291,9 +356,28 @@ ggp <- ggplot(data = d, mapping = aes(x=interval,y=avgSteps)) +
   stat_smooth()
 
   ggsave(paste("figures/weekEndDayData","Chunk05",".png",sep=""))
+```
 
+```
+## Saving 7 x 5 in image
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+```
+
+```r
 plot(ggp)
 ```
+
+```
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+## geom_smooth: method="auto" and size of largest group is <1000, so using loess. Use 'method = x' to change the smoothing method.
+```
+
+![](PA1_template_files/figure-html/chunk05-1.png) 
 
 There was significant differences between weekend days and the weekdays.  Not only were there almost 20% more steps taken on average on the weekend days, but people got up later and had more steps during the midday and then went to bed later in the evening over the weekend.
 
